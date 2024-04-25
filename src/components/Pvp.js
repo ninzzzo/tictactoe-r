@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './pvp.css';
+import GameStyle from './game.module.css';
 import moveSound from './move.MP3';
 import winSound from './win.MP3';
 import clickSound from './click.mp3';
-
-
 
 export const Pvp = () => {
   const [mySound, setMySound] = useState(() => {
@@ -34,8 +32,6 @@ export const Pvp = () => {
     }
   };
 
-
-
   const clickSoundAudio = new Audio(clickSound);
   const moveSoundAudio = new Audio(moveSound);
   const winSoundAudio = new Audio(winSound);
@@ -47,7 +43,6 @@ export const Pvp = () => {
       setMySound(JSON.parse(savedSound));
     }
   }, []);
-
 
   const [turn0, setTurn0] = useState(true);
   const [winner, setWinner] = useState('');
@@ -72,6 +67,11 @@ export const Pvp = () => {
     }
   }, []);
 
+  useEffect(() => {
+    document.body.style.color = myStyle.color;
+    document.body.style.backgroundColor = myStyle.backgroundColor;
+  }, [myStyle]);
+
   const winPatterns = [
     [0, 1, 2],
     [0, 3, 6],
@@ -93,8 +93,8 @@ export const Pvp = () => {
     checkWinner(newBoxes);
   };
 
-
   const checkWinner = (newBoxes) => {
+    let draw = true;
     for (let pattern of winPatterns) {
       const [pos1, pos2, pos3] = pattern;
       if (newBoxes[pos1] && newBoxes[pos1] === newBoxes[pos2] && newBoxes[pos1] === newBoxes[pos3]) {
@@ -105,17 +105,29 @@ export const Pvp = () => {
         return;
       }
     }
+    for (let box of newBoxes) {
+      if (box === '') {
+        draw = false;
+        break;
+      }
+    }
+    if (draw) {
+      setWinner('DRAW');
+      setMsgVisible(true);
+    }
   };
+
   const boxRefs = useRef([]);
   boxRefs.current = new Array(9).fill(null);
 
   const drawLine = (start, end) => {
     const rect1 = start.getBoundingClientRect();
     const rect2 = end.getBoundingClientRect();
-    const x1 = rect1.left + rect1.width / 2;
-    const y1 = rect1.top + rect1.height / 2;
-    const x2 = rect2.left + rect2.width / 2;
-    const y2 = rect2.top + rect2.height / 2;
+    const containerRect = document.querySelector(`.${GameStyle.boxContainer}`).getBoundingClientRect();
+    const x1 = rect1.left + rect1.width / 2 - containerRect.left;
+    const y1 = rect1.top + rect1.height / 2 - containerRect.top;
+    const x2 = rect2.left + rect2.width / 2 - containerRect.left;
+    const y2 = rect2.top + rect2.height / 2 - containerRect.top;
     const dx = x2 - x1;
     const dy = y2 - y1;
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -127,10 +139,9 @@ export const Pvp = () => {
       left: `${x1}px`,
       top: `${y1}px`,
       position: 'absolute',
-      display: 'block',
+      display: 'flex',
     });
   };
-
 
   const newGame = () => {
     setTurn0(true);
@@ -142,37 +153,58 @@ export const Pvp = () => {
     winSoundAudio.pause();
   };
 
-  const stopAllSounds = () => {
-    [ moveSoundAudio, winSoundAudio].forEach(sound => {
-      sound.pause();
-      sound.currentTime = 0;
-    });
-  };
+  const [buttonStyle] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme
+      ? JSON.parse(savedTheme).color === '#ffffff'
+        ? {
+          color: '#ffffff',
+          backgroundColor: '#212121',
+          boxShadow: '0 0 8px rgba(0,0,0,0.3)',
+          border: '1px solid #adadad',
+        }
+        : {
+          color: 'black',
+          backgroundColor: '#ffffff',
+          boxShadow: '0 0 8px rgba(0,0,0,0.3)',
+        }
+      : {
+        color: '#ffffff',
+        backgroundColor: '#212121',
+        boxShadow: '0 0 8px rgba(0,0,0,0.3)',
+        border: '1px solid #adadad',
+      };
+  });
 
   return (
-    <div style={myStyle}>
-      <h1 id="navbar">Player vs Player</h1>
+    <div className={GameStyle.game} style={{ ...myStyle, boxShadow: 'none' }}>
+      <h1 className={GameStyle.navbar}>Player vs Player</h1>
       <hr />
-      <div id="parentContainer" >
-        <div id="container">
+      <div className={GameStyle.mainBox} >
+
+        <div className={GameStyle.boxContainer}>
           {boxes.map((box, index) => (
-            <button key={index} className="boxp" ref={(el) => (boxRefs.current[index] = el)} onClick={() => handleBoxClick(index)}>
+            <button key={index} className={GameStyle.box} ref={(el) => (boxRefs.current[index] = el)} onClick={() => handleBoxClick(index)}>
               {box}
             </button>
           ))}
+        </div>
+        <div className={`${GameStyle.msgContainer} ${msgVisible ? '' : 'hide'}`}>
+          <p id="msg">
+            {winner === 'DRAW' && 'DRAW'}
+            {winner && winner !== 'DRAW' && `${winner} Wins`}
+          </p>
+        </div>
 
-        </div>
-        <div className={`msg-container ${msgVisible ? '' : 'hide'}`}>
-          <p id="msg">{winner ? `${winner} Wins` : "It's a draw!"}</p>
-        </div>
-        <div id="line" style={lineStyle}></div>
       </div>
-      <div id="BtnBox">
-        <Link to="/"><button id="BackBtn" onClick={()=>{playClickSound();stopAllSounds()}}>Back</button></Link>
-        <button id="NewGame" onClick={newGame}>New Game</button>
+      <div className={GameStyle.lineContainer}>
+        <div className={GameStyle.line} style={lineStyle}></div>
+      </div>
+
+      <div className={GameStyle.Btnbox}>
+        <button style={buttonStyle} className={GameStyle.Btn1} onClick={newGame}>New Game</button>
+        <Link to="/" style={{ textDecoration: 'none' }}><button className={GameStyle.Btn2} style={buttonStyle} onClick={() => { playClickSound(); }}>Back</button></Link>
       </div>
     </div>
-
-
   );
 };

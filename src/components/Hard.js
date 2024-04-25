@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './Easy.css';
+import GameStyle from './game.module.css';
 import moveSound from './move.MP3';
 import winSound from './win.MP3';
 import clickSound from './click.mp3';
 import LossSound from './loss.MP3';
-
-
 
 export const Hard = () => {
 
@@ -39,12 +37,10 @@ export const Hard = () => {
     }
   };
 
-
   const clickSoundAudio = new Audio(clickSound);
   const moveSoundAudio = new Audio(moveSound);
   const winSoundAudio = new Audio(winSound);
   const lossSoundAudio = new Audio(LossSound);
-
 
   useEffect(() => {
     const savedSound = localStorage.getItem('sound');
@@ -53,8 +49,6 @@ export const Hard = () => {
     }
   }, []);
 
-
-  
   const [turn0, setTurn0] = useState(true);
   const [winner, setWinner] = useState('');
   const [lineStyle, setLineStyle] = useState({});
@@ -72,27 +66,17 @@ export const Hard = () => {
       };
   });
 
-  
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setMyStyle(JSON.parse(savedTheme));
+    }
+  }, []);
 
   useEffect(() => {
-    const savedSound = localStorage.getItem('sound');
-    if (savedSound) {
-      setMySound(JSON.parse(savedSound));
-    }
-
-    // Determine who starts the game
-    const shouldAIPlayFirst = !lastStarterAI;
-
-    // If AI starts, make the AI's move first
-    if (shouldAIPlayFirst) {
-      setTimeout(() => {
-        aiTurn(Array(9).fill(''));
-      }, Math.random() * 1000);
-    }
-
-    // Update who started the last game
-    setLastStarterAI(!lastStarterAI);
-  }, []);
+    document.body.style.color = myStyle.color;
+    document.body.style.backgroundColor = myStyle.backgroundColor;
+  }, [myStyle]);
 
 
   const winPatterns = [
@@ -118,13 +102,10 @@ export const Hard = () => {
     }
   };
 
-  
-
   const aiTurn = (currentBoxes) => {
 
     if (gameStatus || checkWinner(currentBoxes)) return;
-   
-    
+
     const emptyBoxes = currentBoxes.reduce((acc, box, index) => (box === '' ? [...acc, index] : acc), []);
 
     const winningMoveIndex = checkForWinningMove(currentBoxes, 'X');
@@ -145,8 +126,6 @@ export const Hard = () => {
     if (currentBoxes[4] === 'O' && ([0, 2, 6, 8].some(index => currentBoxes[index] === 'X')) && currentBoxes[7] === 'O' && currentBoxes[1] === '') {
       return makeMove(currentBoxes, 1, 'X');
     }
-    
-
 
     if (currentBoxes[0] === 'X' && currentBoxes[4] === 'O' && currentBoxes[8] === '') {
       return makeMove(currentBoxes, 8, 'X');
@@ -181,8 +160,6 @@ export const Hard = () => {
       return makeMove(currentBoxes, availablePositions[Math.floor(Math.random() * availablePositions.length)], 'X');
     }
 
- 
-
     const emptyCorners = emptyBoxes.filter(index => [0, 2, 6, 8].includes(index));
     if (emptyCorners.length > 0) return makeMove(currentBoxes, emptyCorners[Math.floor(Math.random() * emptyCorners.length)], 'X');
 
@@ -197,9 +174,6 @@ export const Hard = () => {
     if (emptySides.length > 0) return makeMove(currentBoxes, emptySides[Math.floor(Math.random() * emptySides.length)], 'X');
   };
 
-
-  
-
   const getOppositeCorner = (currentBoxes) => {
     const corners = [0, 2, 6, 8];
     const middle = 4;
@@ -211,11 +185,6 @@ export const Hard = () => {
     return -1;
   };
   const checkForWinningMove = (boxes, symbol) => {
-    const winPatterns = [
-      [0, 1, 2], [3, 4, 5], [6, 7, 8], 
-      [0, 3, 6], [1, 4, 7], [2, 5, 8],
-      [0, 4, 8], [2, 4, 6] 
-    ];
 
     for (const pattern of winPatterns) {
       const [a, b, c] = pattern;
@@ -223,12 +192,8 @@ export const Hard = () => {
       if (boxes[a] === symbol && boxes[b] === '' && boxes[c] === symbol) return b;
       if (boxes[a] === '' && boxes[b] === symbol && boxes[c] === symbol) return a;
     }
-
     return -1;
   };
-
-
-
 
   const makeMove = (currentBoxes, index, symbol) => {
     setTimeout(() => {
@@ -236,26 +201,36 @@ export const Hard = () => {
       newBoxes[index] = symbol;
       setBoxes(newBoxes);
       setTurn0(true);
+      playMoveSound();
       checkWinner(newBoxes);
-    }, Math.random() < 0.5 ? 600 : 1500);
+    }, Math.random() < 0.5 ? 600 : 900);
   };
 
   const checkWinner = (newBoxes) => {
+    let draw = true;
     for (let pattern of winPatterns) {
       const [pos1, pos2, pos3] = pattern;
       if (newBoxes[pos1] && newBoxes[pos1] === newBoxes[pos2] && newBoxes[pos1] === newBoxes[pos3]) {
-        const winnerSymbol = newBoxes[pos1];
-        setWinner(winnerSymbol);
+        setWinner(newBoxes[pos1]);
         setMsgVisible(true);
         drawLine(boxRefs.current[pos1], boxRefs.current[pos3]);
-        gameStatus = true;
-        if (winnerSymbol === 'O') {
+        if (newBoxes[pos1] === 'O') {
           playWinSound();
         } else {
           playLossSound();
         }
-        return;
+        return true;
       }
+    }
+    for (let box of newBoxes) {
+      if (box === '') {
+        draw = false;
+        break;
+      }
+    }
+    if (draw) {
+      setWinner('DRAW');
+      setMsgVisible(true);
     }
   };
 
@@ -265,10 +240,11 @@ export const Hard = () => {
   const drawLine = (start, end) => {
     const rect1 = start.getBoundingClientRect();
     const rect2 = end.getBoundingClientRect();
-    const x1 = rect1.left + rect1.width / 2;
-    const y1 = rect1.top + rect1.height / 2;
-    const x2 = rect2.left + rect2.width / 2;
-    const y2 = rect2.top + rect2.height / 2;
+    const containerRect = document.querySelector(`.${GameStyle.boxContainer}`).getBoundingClientRect();
+    const x1 = rect1.left + rect1.width / 2 - containerRect.left;
+    const y1 = rect1.top + rect1.height / 2 - containerRect.top;
+    const x2 = rect2.left + rect2.width / 2 - containerRect.left;
+    const y2 = rect2.top + rect2.height / 2 - containerRect.top;
     const dx = x2 - x1;
     const dy = y2 - y1;
     const angle = Math.atan2(dy, dx) * 180 / Math.PI;
@@ -280,25 +256,20 @@ export const Hard = () => {
       left: `${x1}px`,
       top: `${y1}px`,
       position: 'absolute',
-      display: 'block',
+      display: 'flex',
     });
   };
 
-  // Define a state variable to keep track of who started last
   const [lastStarterAI, setLastStarterAI] = useState(false);
 
   const newGame = (event) => {
     event.stopPropagation();
     setTimeout(() => {
-      // Determine who starts the game
       const aiStarts = !lastStarterAI;
 
-      // If AI starts, make the AI's move first
       if (aiStarts) {
         aiTurn(Array(9).fill(''));
       }
-
-      // Set initial game state
       setTurn0(!aiStarts);
       setWinner('');
       setBoxes(Array(9).fill(''));
@@ -307,46 +278,64 @@ export const Hard = () => {
       playClickSound();
       gameStatus = false;
 
-      // Update who started the last game
       setLastStarterAI(!lastStarterAI);
     });
   };
 
-
-
-  const stopAllSounds = () => {
-    [moveSoundAudio, winSoundAudio].forEach(sound => {
-      sound.pause();
-      sound.currentTime = 0;
-    });
-  };
+  const [buttonStyle] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return savedTheme
+      ? JSON.parse(savedTheme).color === '#ffffff'
+        ? {
+          color: '#ffffff',
+          backgroundColor: '#212121',
+          boxShadow: '0 0 8px rgba(0,0,0,0.3)',
+          border: '1px solid #adadad',
+        }
+        : {
+          color: 'black',
+          backgroundColor: '#ffffff',
+          boxShadow: '0 0 8px rgba(0,0,0,0.3)',
+        }
+      : {
+        color: '#ffffff',
+        backgroundColor: '#212121',
+        boxShadow: '0 0 8px rgba(0,0,0,0.3)',
+        border: '1px solid #adadad',
+      };
+  });
 
   return (
-    <div style={myStyle}>
-      <div className="navbar">
-        <div>
-          <h1>Player vs AI</h1>
-          <h6>Hard Mode</h6>
-        </div>
+    <div className={GameStyle.game} style={{ ...myStyle, boxShadow: 'none' }}>
+      <h1 className={GameStyle.navbar}>Player vs AI</h1>
+      <div className={GameStyle.heading}>
+        <h6>Hard Mode</h6>
       </div>
       <hr />
-      <div id="parentContainer">
-        <div id="container">
+      <div className={GameStyle.mainBox} >
+
+        <div className={GameStyle.boxContainer}>
           {boxes.map((box, index) => (
-            <button key={index} className="boxp" ref={(el) => (boxRefs.current[index] = el)} onClick={() => playerTurn(index)} >
+            <button key={index} className={GameStyle.box} ref={(el) => (boxRefs.current[index] = el)} onClick={() => playerTurn(index)}>
               {box}
             </button>
           ))}
+        </div>
+        <div className={`${GameStyle.msgContainer} ${msgVisible ? '' : 'hide'}`}>
+          <p id="msg">
+            {winner === 'DRAW' && 'DRAW'}
+            {winner && winner !== 'DRAW' && `${winner} Wins`}
+          </p>
+        </div>
 
-        </div>
-        <div className={`msg-container ${msgVisible ? '' : 'hide'}`}>
-          <p id="msg">{winner ? `${winner} Wins` : "It's a draw!"}</p>
-        </div>
-        <div id="line" style={lineStyle}></div>
       </div>
-      <div id="BtnBox">
-        <Link to="/"><button id="BackBtn" onClick={() => { playClickSound(); stopAllSounds() }}>Back</button></Link>
-        <button id="NewGame" onClick={newGame}>New Game</button>
+      <div className={GameStyle.lineContainer}>
+        <div className={GameStyle.line} style={lineStyle}></div>
+      </div>
+
+      <div className={GameStyle.Btnbox}>
+        <button style={buttonStyle} className={GameStyle.Btn1} onClick={newGame}>New Game</button>
+        <Link to="/" style={{ textDecoration: 'none' }}><button className={GameStyle.Btn2} style={buttonStyle} onClick={() => { playClickSound(); }}>Back</button></Link>
       </div>
     </div>
   );

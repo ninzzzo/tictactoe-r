@@ -1,0 +1,203 @@
+@keyframes popUp {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@import url("https://fonts.googleapis.com/css?family=Roboto:500,600&display=swap");
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Roboto";
+}
+
+.startScreen {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 450px;
+  width: 300px;
+  border-radius: 30%;
+  color: #f1f1f1;
+}
+
+.allBtn {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 450px;
+  width: 300px;
+  gap: 30px;
+}
+
+.header {
+  position: absolute;
+  margin-top: -90%;
+}
+
+button {
+  height: 40px;
+  width: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 30px;
+  border: none;
+  font-size: 13px;
+}
+.pvp {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+}
+.pvp:hover,
+.modeBtn:hover,
+.moreBtn:hover {
+  height: 43px;
+  width: 153px;
+  font-size: 13.5px;
+}
+.modeBtn {
+  position: absolute;
+  margin-top: 30%;
+}
+.moreBtn {
+  position: absolute;
+  margin-top: 90%;
+}
+.mode1,
+.mode2 {
+  width: 80px;
+  height: 30px;
+  animation: popUp ease 0.3s;
+}
+.mode1:hover {
+  border: 2px solid rgb(215, 215, 0) !important;
+}
+.mode2:hover {
+  border: 2px solid rgb(255, 15, 15) !important;
+}
+
+.more1 {
+  width: 90px;
+  height: 40px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin-left: 60px;
+}
+.more2 {
+  width: 90px;
+  height: 40px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin-left: -60px;
+}
+.more1:hover,
+.more2:hover {
+  width: 93px;
+  height: 43px;
+}
+.modeContainer {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+}
+
+.moreContainer {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+}
+
+.socials {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 10px;
+  margin-top: 80%;
+}
+
+.socialBtn1 {
+  height: 50px;
+  width: 50px;
+  animation: popUp ease 0.2s;
+}
+.socialBtn2 {
+  height: 50px;
+  width: 50px;
+  animation: popUp ease 0.4s;
+}
+.socialBtn3 {
+  height: 50px;
+  width: 50px;
+  animation: popUp ease 0.6s;
+}
+.socialBtn4 {
+  height: 50px;
+  width: 50px;
+  animation: popUp ease 0.8s;
+}
+.settingContainer {
+  position: absolute;
+  left: 50%;
+  top: 80%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  white-space: nowrap;
+}
+.socialBtn1,
+.socialBtn2,
+.socialBtn3,
+.socialBtn4 {
+  font-size: 20px;
+}
+.socialBtn1:hover svg {
+  font-size: 22px;
+  color: #d62991 !important;
+}
+
+.socialBtn2:hover svg {
+  font-size: 23px;
+  filter: invert(100%) !important;
+}
+
+.socialBtn3:hover svg {
+  font-size: 22px;
+  color: #2360b0 !important;
+}
+
+.socialBtn4:hover svg {
+  font-size: 22px;
+  color: #d12923 !important;
+}

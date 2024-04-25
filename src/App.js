@@ -1,8 +1,7 @@
-import Home from './components/Home';
+import Home from './homepage/Home';
 import { Pvp } from './components/Pvp';
 import { Easy } from './components/Easy';
 import { Hard } from './components/Hard';
-import './App.css';
 import {
   BrowserRouter,
   Routes,
